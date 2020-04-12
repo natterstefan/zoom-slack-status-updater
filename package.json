@@ -23,6 +23,7 @@
     "express": "^4.17.1"
   },
   "devDependencies": {
+    "all-contributors-cli": "^6.14.1",
     "nodemon": "^2.0.3"
   }
 }
