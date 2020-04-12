@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "env": {
+    "SLACK_TOKEN_1": "@slack_token_1"
+  },
+  "builds": [{ "src": "/src/index.js", "use": "@now/node-server" }],
+  "routes": [
+    {
+      "src": "/.*",
+      "dest": "/src/index.js",
+      "methods": ["GET", "POST"]
+    }
+  ]
+}
