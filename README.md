@@ -11,9 +11,9 @@ Update your Slack status automatically when you join a Zoom meeting.
 
 ## Requirements
 
-- Zoom App
-- Slack App
-- ZEIT account
+- a Zoom App
+- a Slack App
+- and a ZEIT account
 
 First, make sure you have `now` and all dependencies installed.
 
@@ -27,7 +27,7 @@ yarn # or npm i
 ### Step 1 - Setup now.sh
 
 1. Create a [ZEIT account](https://zeit.co/signup)
-2. Run `now login` (login with your now account) in your terminal
+2. Run `now login` (login with your ZEIT account) in your terminal
 
 ### Step 2 - Setup Slack
 
@@ -38,36 +38,46 @@ yarn # or npm i
 3. Copy and paste each `OAuth Access Token` into the configuration file created
    in the subsequent step.
 
+![Create Webhook Only Zoom App](./assets/slack.png)
+
 ### Step 3 - Configure App
 
 1. Duplicate the [example config](./slack-status-config-example.js) and rename
-   it to `slack-status-config.js`.
+   it to `slack-status-config.js`. This should happen automatically thanks
+   to a `postinstall` script.
 2. Create a config object for each slack workspace you want to update when a
    Zoom meeting starts.
 
-You can either use `now secret` for the token values, or copy the string into
-the config.
+You can either use `now secret` for the token values, or copy the token string
+right into the workspace config. I used the secret option described below:
 
 #### now secrets
 
-When working with `now secret` you need to do the following for _each_ secret:
+When working with [`now secret`](https://zeit.co/docs/v2/build-step#using-environment-variables-and-secrets)
+you need to do the following for _each_ secret (aka Slack app token):
+
+Step 1 - create a secret
 
 ```bash
-# Step 1 - create a secret
 now secret add SLACK_TOKEN_1 "xoxp-xxx-xxx"
+```
 
-# Step 2 - add secret to `now.json`
-#   "env": {
-#    "SLACK_TOKEN_1": "@slack_token_1"
-#  },
-#
+Step 2 - add the secret to `now.json`
 
-# Step 3 - add `process.env.NAME` to your configuration file
-#  {
-#    name: 'Slack Workspace 1',
-#    token: process.env.SLACK_TOKEN_1,
-#    ...
-#  }
+```json
+  "env": {
+    "SLACK_TOKEN_1": "@slack_token_1"
+  }
+```
+
+Step 3 - add `process.env.<secret name>` to your configuration file
+
+```js
+  {
+    name: 'Slack Workspace 1',
+    token: process.env.SLACK_TOKEN_1,
+    ...
+  }
 ```
 
 #### Example configuration
@@ -95,20 +105,31 @@ module.exports = [
 ### Step 4 - Deploy App to now.sh
 
 ```bash
+# example questions when setting up the now project for the first time
+# What’s your project’s name? your-app-name
+# In which directory is your code located? ./
 now
 ```
 
-Remember the created now.sh URL, you gonna need it in the next step for the ZOOM
-app.
+This will guide you through the process of creating and deploying the project to
+now.sh. Remember the created URL. You are going to need it in the next step for
+the ZOOM app.
 
-#### Step 5 - Zoom
+Tip: Do not use an obvious name for your now.sh URL here, something random or
+other people could mess with your Slack status. 😆
 
-[Create a new (or use an existing) "Webhook Only" app](https://marketplace.zoom.us/develop/create)
-on Zoom with your Zoom account.
+### Step 5 - Setup Zoom
+
+![Create Webhook Only Zoom App](./assets/zoom_1.png)
+
+[Create a new (or use an existing) "Webhook Only" Zoom app](https://marketplace.zoom.us/develop/create)
+with your Zoom account.
 
 Fill out the required information and activate `Event Subscriptions`. Add
-`User’s presence status has been updated` and add the generated now.sh domain
-for `Event notification endpoint URL`.
+the `User’s presence status has been updated` event type and the generated
+now.sh domain for `Event notification endpoint URL`.
+
+![Setup Zoom App](./assets/zoom_2.png)
 
 You can read more about it setting up the App [here](https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated).
 
