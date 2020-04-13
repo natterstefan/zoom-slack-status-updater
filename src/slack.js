@@ -48,9 +48,9 @@ const updateSlackStatus = async ({ token, text, emoji }) => {
  * or not the other promises have resolved.
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
  */
-module.exports = (isInMeeting) => {
-  return Promise.all(
-    slackWorkspaces.map((slackWorkspace) => {
+module.exports = (isInMeeting = false, workspaces = slackWorkspaces) =>
+  axios.all(
+    workspaces.map((slackWorkspace) => {
       const status = isInMeeting ? 'meetingStatus' : 'noMeetingStatus'
       return updateSlackStatus({
         token: slackWorkspace.token,
@@ -59,4 +59,3 @@ module.exports = (isInMeeting) => {
       })
     }),
   )
-}

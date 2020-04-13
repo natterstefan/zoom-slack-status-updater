@@ -1,8 +1,11 @@
 # Zoom Slack Status Updater
 
-![now](https://img.shields.io/badge/deploy%20on-now.sh-green?logo=zeit&style=flat)
+![now](https://img.shields.io/badge/microservice%20for-now.sh-green?logo=zeit&style=flat)
 ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/natterstefan/zoom-slack-status-updater?include_prereleases)
 ![GitHub](https://img.shields.io/github/license/natterstefan/zoom-slack-status-updater)
+
+[![Build Status](https://travis-ci.com/natterstefan/zoom-slack-status-updater.svg?branch=master)](https://travis-ci.com/natterstefan/zoom-slack-status-updater)
+[![Coverage Status](https://coveralls.io/repos/github/natterstefan/zoom-slack-status-updater/badge.svg?branch=master)](https://coveralls.io/github/natterstefan/zoom-slack-status-updater?branch=master)
 
 Update your Slack status automatically when you join a Zoom meeting.
 
@@ -132,7 +135,8 @@ now ls
 ## Other solutions
 
 - https://github.com/cmmarslender/zoom-status
-- https://github.com/mivok/slack_status_updater
+- https://github.com/mivok/slack_status_updater with [hammerspoon](http://macappstore.org/hammerspoon/)
+- https://github.com/chrisscott/ZoomSlack
 
 ## References
 

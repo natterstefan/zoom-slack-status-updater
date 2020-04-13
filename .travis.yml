@@ -1,0 +1,28 @@
+language: node_js
+
+env:
+  global:
+    - YARN_VERSION="1.21.1"
+
+node_js:
+  - 'node'
+
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
+  - export PATH="$HOME/.yarn/bin:$PATH"
+
+script:
+  - yarn test
+
+notifications:
+  email:
+    on_failure: change
+
+after_success: 'yarn coveralls'
+
+cache:
+  yarn: true
+  directories:
+    - ~/.npm # cache npm's cache
+    - ~/npm # cache latest npm
+    - node_modules
