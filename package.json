@@ -6,6 +6,7 @@
   "main": "./src/index.js",
   "scripts": {
     "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
+    "postinstall": "node scripts/copyfile.js",
     "start": "node .",
     "watch": "nodemon ./src/index.js",
     "test": "jest ."
