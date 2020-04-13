@@ -82,6 +82,9 @@ Step 3 - add `process.env.<secret name>` to your configuration file
 
 #### Example configuration
 
+You can add as many slack workspaces as you want here, just make sure you have
+created an app for each of them.
+
 ```js
 module.exports = [
   {
@@ -123,7 +126,8 @@ other people could mess with your Slack status. 😆
 ![Create Webhook Only Zoom App](./assets/zoom_1.png)
 
 [Create a new (or use an existing) "Webhook Only" Zoom app](https://marketplace.zoom.us/develop/create)
-with your Zoom account.
+with your Zoom account. Even if you added multiple Slack workspaces, you just
+need one Zoom app.
 
 Fill out the required information and activate `Event Subscriptions`. Add
 the `User’s presence status has been updated` event type and the generated

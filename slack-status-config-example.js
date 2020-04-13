@@ -1,4 +1,6 @@
 module.exports = [
+  // You can add as many slack workspaces as you want here, just make sure
+  // you have created an app for each of them.
   {
     // this name can be anything and is only for you, it is not used in the app
     name: 'Slack Workspace 1',
