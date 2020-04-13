@@ -137,6 +137,7 @@ now ls
 - https://github.com/cmmarslender/zoom-status
 - https://github.com/mivok/slack_status_updater with [hammerspoon](http://macappstore.org/hammerspoon/)
 - https://github.com/chrisscott/ZoomSlack
+- [How to automatically update your Slack status with Zapier](https://zapier.com/blog/automate-slack-status/)
 
 ## References
 
