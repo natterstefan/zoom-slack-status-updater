@@ -40,7 +40,7 @@ describe('app', () => {
     'updateSlackStatus to "not in a meeting" when presence_status is %s',
     async (status) => {
       await doRequest(status)
-      expect(updateSlackStatus).toHaveBeenCalledWith(false)
+      expect(updateSlackStatus).toHaveBeenCalledWith(false, undefined, undefined)
     },
   )
 
@@ -48,7 +48,7 @@ describe('app', () => {
     'updateSlackStatus to "in a meeting" when presence_status is %s',
     async (status) => {
       await doRequest(status)
-      expect(updateSlackStatus).toHaveBeenCalledWith(true)
+      expect(updateSlackStatus).toHaveBeenCalledWith(true, undefined, undefined)
     },
   )
 

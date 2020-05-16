@@ -24,10 +24,10 @@ app.post('/', async (req, res, next) => {
   if (!currentPresenceStatus) {
     return next(new Error('presence_status is not available'))
   }
-
+  const eventUserMail = get(req, 'body.payload.object.email')
   try {
     const isInMeeting = currentPresenceStatus === ZOOM_IN_MEETING_STATUS
-    await updateSlackStatus(isInMeeting)
+    await updateSlackStatus(isInMeeting, undefined, eventUserMail)
 
     logger(
       'SLACK updated',
@@ -35,6 +35,7 @@ app.post('/', async (req, res, next) => {
     )
     res.sendStatus(200)
   } catch (error) {
+    logger('slack update failed with error', error)
     return next(new Error(error))
   }
 })
