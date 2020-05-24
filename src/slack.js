@@ -48,19 +48,29 @@ const updateSlackStatus = async ({ token, text, emoji }) => {
  * or not the other promises have resolved.
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
  */
-module.exports = (isInMeeting = false, workspaces = slackWorkspaces, eventUserMail = '') =>
-  axios.all(
-    workspaces.map((slackWorkspace) => {
-      if (slackWorkspace.userMail === undefined || slackWorkspace.userMail === eventUserMail) {
-          const status = isInMeeting ? 'meetingStatus' : 'noMeetingStatus'
-          return updateSlackStatus({
-                  token: slackWorkspace.token,
-                  text: slackWorkspace[status].text,
-                  emoji: slackWorkspace[status].emoji,
-                })
-        }else{
-            logger("not updating workspace because of email filter", slackWorkspace.name)
-          return false
-        }
-      }),
-    )
+module.exports = (options) => {
+  const { isInMeeting = false, workspaces = slackWorkspaces, email = '' } =
+    options || {}
+
+  return axios.all(
+    workspaces.map((workspace) => {
+      const hasConfiguredMail = !!workspace.email
+      const configuredMailsMatch = workspace.email === email
+
+      if (!hasConfiguredMail || (hasConfiguredMail && configuredMailsMatch)) {
+        const status = isInMeeting ? 'meetingStatus' : 'noMeetingStatus'
+
+        return updateSlackStatus({
+          token: workspace.token,
+          text: workspace[status].text,
+          emoji: workspace[status].emoji,
+        })
+      } else {
+        logger(
+          `not updating workspace ${workspace.name} because email does not match`,
+        )
+        return Promise.resolve(null)
+      }
+    }),
+  )
+}

@@ -8,8 +8,9 @@
     "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
     "postinstall": "node scripts/copyfile.js",
     "start": "node .",
+    "test": "jest .",
     "watch": "nodemon ./src/index.js",
-    "test": "jest ."
+    "watch-test": "jest . --watch"
   },
   "keywords": [
     "zoom",

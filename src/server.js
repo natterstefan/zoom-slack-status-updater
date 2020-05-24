@@ -20,14 +20,15 @@ app.use(bodyParser.json())
 app.post('/', async (req, res, next) => {
   logger('ZOOM request', req.body)
 
+  const currentEmail = get(req, 'body.payload.object.email')
   const currentPresenceStatus = get(req, 'body.payload.object.presence_status')
   if (!currentPresenceStatus) {
     return next(new Error('presence_status is not available'))
   }
-  const eventUserMail = get(req, 'body.payload.object.email')
+
   try {
     const isInMeeting = currentPresenceStatus === ZOOM_IN_MEETING_STATUS
-    await updateSlackStatus(isInMeeting, undefined, eventUserMail)
+    await updateSlackStatus({ isInMeeting, email: currentEmail })
 
     logger(
       'SLACK updated',
@@ -35,7 +36,6 @@ app.post('/', async (req, res, next) => {
     )
     res.sendStatus(200)
   } catch (error) {
-    logger('slack update failed with error', error)
     return next(new Error(error))
   }
 })
@@ -45,7 +45,10 @@ app.get('/', (_req, res) => {
   res.send('I am online :)')
 })
 
-// global error middleware
+/**
+ * global error middleware, catches any uncatched errors thrown in app routes.
+ * Logs the error to the console.
+ */
 app.use(function (error, _req, res, _next) {
   logger('REQUEST error', error.message)
   res.sendStatus(200)
