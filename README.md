@@ -34,6 +34,12 @@ yarn test
 
 ## Setup & Deployment
 
+Before you start, create your own `now.json` (if it does not exist already):
+
+```bash
+cp now-example.json now.json
+```
+
 ### Step 1 - Setup now.sh
 
 1. Create a [ZEIT account](https://zeit.co/signup)
@@ -215,6 +221,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

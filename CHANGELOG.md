@@ -16,6 +16,8 @@ adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 ### Chore
 
 - added travis and tests
+- added `now.json` to `.gitignore` as it should be possible to customize it
+  without creating a diff
 
 ## 0.1.0 (2020-04-12)
 
