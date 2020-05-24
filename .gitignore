@@ -106,3 +106,7 @@ dist
 
 .now
 slack-status-config.js
+.vercel
+
+# intellij stuff
+.idea

@@ -53,10 +53,10 @@ describe('updateSlack', () => {
       )
     })
 
-    const result = await updateSlack(false, [
-      ...mockExampleConfig,
-      ...mockExampleConfig,
-    ])
+    const result = await updateSlack({
+      isInMeeting: false,
+      workspaces: [...mockExampleConfig, ...mockExampleConfig],
+    })
     expect(result).toHaveLength(2)
   })
 
@@ -82,7 +82,7 @@ describe('updateSlack', () => {
       request.respondWith(DEFAULT_SLACK_RESPONSE)
     })
 
-    const result = await updateSlack(true)
+    const result = await updateSlack({ isInMeeting: true })
 
     expect(result[0].request.config.data).toStrictEqual(
       '{"profile":{"status_text":"I\'m in a meeting","status_emoji":":warning:","status_expiration":0}}',
@@ -95,11 +95,56 @@ describe('updateSlack', () => {
       request.respondWith(DEFAULT_SLACK_RESPONSE)
     })
 
-    const result = await updateSlack(false)
+    const result = await updateSlack({ isInMeeting: false })
 
     expect(result[0].request.config.data).toStrictEqual(
       '{"profile":{"status_text":"","status_emoji":"","status_expiration":0}}',
     )
+  })
+
+  it('invokes slack api with proper request data when user is in meeting and mail matches', async () => {
+    moxios.wait(() => {
+      const request = moxios.requests.mostRecent()
+      request.respondWith(DEFAULT_SLACK_RESPONSE)
+    })
+
+    const result = await updateSlack({
+      isInMeeting: true,
+      workspaces: [
+        {
+          name: 'Slack Workspace 1',
+          email: 'your-address@mail.com',
+          token: 'xoxp-xxx-xxx',
+          meetingStatus: {
+            text: "I'm in a meeting",
+            emoji: ':warning:', // emoji code
+          },
+          noMeetingStatus: {
+            text: '',
+            emoji: '',
+          },
+        },
+      ],
+      email: 'your-address@mail.com',
+    })
+
+    expect(result[0].request.config.data).toStrictEqual(
+      '{"profile":{"status_text":"I\'m in a meeting","status_emoji":":warning:","status_expiration":0}}',
+    )
+  })
+
+  it('does not invokes slack api when mail does not match', async () => {
+    const result = await updateSlack({
+      isInMeeting: true,
+      workspaces: [
+        {
+          email: 'another-address@mail.com',
+        },
+      ],
+      email: 'your-address@mail.com',
+    })
+
+    expect(result[0]).toBeNull()
   })
 
   describe('error handling', () => {
@@ -143,7 +188,10 @@ describe('updateSlack', () => {
       })
 
       await expect(
-        updateSlack(false, [...mockExampleConfig, ...mockExampleConfig]),
+        updateSlack({
+          isInMeeting: false,
+          workspaces: [...mockExampleConfig, ...mockExampleConfig],
+        }),
       ).rejects.toBeTruthy()
     })
   })

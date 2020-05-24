@@ -9,6 +9,9 @@ adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 ### Features
 
 - optimised server error handling
+- workspace config can contain `email` (optional). Only when `email` matches the
+  response the slack status is updated
+  (resolves [#1](https://github.com/natterstefan/zoom-slack-status-updater/issues/1))
 
 ### Chore
 

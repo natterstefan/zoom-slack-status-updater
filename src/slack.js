@@ -1,6 +1,7 @@
 const axios = require('axios')
 
 const slackWorkspaces = require('../slack-status-config')
+const logger = require('./logger')
 
 const { ENDPOINT } = require('./config')
 
@@ -29,7 +30,6 @@ const updateSlackStatus = async ({ token, text, emoji }) => {
         },
       },
     )
-
     if (response.data.error) {
       throw new Error(response.data.error)
     }
@@ -48,14 +48,29 @@ const updateSlackStatus = async ({ token, text, emoji }) => {
  * or not the other promises have resolved.
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
  */
-module.exports = (isInMeeting = false, workspaces = slackWorkspaces) =>
-  axios.all(
-    workspaces.map((slackWorkspace) => {
-      const status = isInMeeting ? 'meetingStatus' : 'noMeetingStatus'
-      return updateSlackStatus({
-        token: slackWorkspace.token,
-        text: slackWorkspace[status].text,
-        emoji: slackWorkspace[status].emoji,
-      })
+module.exports = (options) => {
+  const { isInMeeting = false, workspaces = slackWorkspaces, email = '' } =
+    options || {}
+
+  return axios.all(
+    workspaces.map((workspace) => {
+      const hasConfiguredMail = !!workspace.email
+      const configuredMailsMatch = workspace.email === email
+
+      if (!hasConfiguredMail || (hasConfiguredMail && configuredMailsMatch)) {
+        const status = isInMeeting ? 'meetingStatus' : 'noMeetingStatus'
+
+        return updateSlackStatus({
+          token: workspace.token,
+          text: workspace[status].text,
+          emoji: workspace[status].emoji,
+        })
+      } else {
+        logger(
+          `not updating workspace ${workspace.name} because email does not match`,
+        )
+        return Promise.resolve(null)
+      }
     }),
   )
+}

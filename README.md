@@ -15,11 +15,21 @@ Update your Slack status automatically when you join a Zoom meeting.
 - a Slack App
 - and a ZEIT account
 
-First, make sure you have `now` and all dependencies installed.
+## Development
+
+### Installation
+
+Make sure you have `now` and all dependencies installed.
 
 ```bash
 npm install -g now
-yarn # or npm i
+yarn install # or npm install
+```
+
+### Tests
+
+```bash
+yarn test
 ```
 
 ## Setup & Deployment
@@ -87,11 +97,23 @@ created an app for each of them.
 
 ```js
 module.exports = [
+  /**
+   * You can add as many slack workspaces as you want here, just make sure
+   * you have created an app for each of them.
+   */
   {
     // this name can be anything and is only for you, it is not used in the app
     name: 'Slack Workspace 1',
-    // either copy & paste the token string here or use
-    // process.env.SLACK_TOKEN_1 (now secret add SLACK_TOKEN_1 "xoxp-xxx-xxx")
+    /**
+     * this is the email address of your zoom user
+     * events are filtered and slack updates are only done for this user
+     * remove, if filtering is not intended
+     */
+    email: 'your-address@mail.com',
+    /**
+     * either copy & paste the token string here or use
+     * process.env.SLACK_TOKEN_1 (now secret add SLACK_TOKEN_1 "xoxp-xxx-xxx")
+     */
     token: 'xoxp-xxx-xxx',
     meetingStatus: {
       text: "I'm in a meeting",
