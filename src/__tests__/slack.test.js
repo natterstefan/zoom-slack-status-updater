@@ -6,6 +6,8 @@ const updateSlack = require('../slack')
 jest.mock('../logger')
 jest.mock('../../slack-status-config', () => mockExampleConfig)
 
+const baseOptions = { verificationToken: 'Vivamusultricies' }
+
 describe('updateSlack', () => {
   const DEFAULT_SLACK_RESPONSE = {
     status: 200,
@@ -20,7 +22,9 @@ describe('updateSlack', () => {
     // inspired by https://github.com/axios/moxios/issues/34#issuecomment-419119802
     moxios.respondAllWith = function () {
       return Array.from(arguments).reduce((_promise, res, i) => {
-        return moxios.requests.at(i).respondWith(res)
+        if (moxios.requests.at(i)) {
+          return moxios.requests.at(i).respondWith(res)
+        }
       }, null)
     }
   })
@@ -29,14 +33,14 @@ describe('updateSlack', () => {
     moxios.uninstall()
   })
 
-  it('invokes slack api for each given workspace', async () => {
+  it('invokes slack api for workspace with matching verificationToken', async () => {
     moxios.wait(() => {
       const request = moxios.requests.mostRecent()
       request.respondWith(DEFAULT_SLACK_RESPONSE)
     })
 
-    const result = await updateSlack()
-    expect(result).toHaveLength(1)
+    const result = await updateSlack(baseOptions)
+    expect(result).toBeTruthy()
   })
 
   it('invokes slack api for multiple workspaces', async () => {
@@ -54,10 +58,10 @@ describe('updateSlack', () => {
     })
 
     const result = await updateSlack({
-      isInMeeting: false,
+      ...baseOptions,
       workspaces: [...mockExampleConfig, ...mockExampleConfig],
     })
-    expect(result).toHaveLength(2)
+    expect(result).toBeTruthy()
   })
 
   it('invokes slack api with proper request config', async () => {
@@ -66,12 +70,12 @@ describe('updateSlack', () => {
       request.respondWith(DEFAULT_SLACK_RESPONSE)
     })
 
-    const result = await updateSlack()
+    const result = await updateSlack(baseOptions)
 
-    expect(result[0].request.config.headers.Authorization).toStrictEqual(
+    expect(result.request.config.headers.Authorization).toStrictEqual(
       'Bearer xoxp-xxx-xxx',
     )
-    expect(result[0].request.config.url).toStrictEqual(
+    expect(result.request.config.url).toStrictEqual(
       'https://slack.com/api/users.profile.set',
     )
   })
@@ -82,9 +86,12 @@ describe('updateSlack', () => {
       request.respondWith(DEFAULT_SLACK_RESPONSE)
     })
 
-    const result = await updateSlack({ isInMeeting: true })
+    const result = await updateSlack({
+      ...baseOptions,
+      presenceStatus: 'Do_Not_Disturb',
+    })
 
-    expect(result[0].request.config.data).toStrictEqual(
+    expect(result.request.config.data).toStrictEqual(
       '{"profile":{"status_text":"I\'m in a meeting","status_emoji":":warning:","status_expiration":0}}',
     )
   })
@@ -95,9 +102,12 @@ describe('updateSlack', () => {
       request.respondWith(DEFAULT_SLACK_RESPONSE)
     })
 
-    const result = await updateSlack({ isInMeeting: false })
+    const result = await updateSlack({
+      ...baseOptions,
+      presenceStatus: 'Available',
+    })
 
-    expect(result[0].request.config.data).toStrictEqual(
+    expect(result.request.config.data).toStrictEqual(
       '{"profile":{"status_text":"","status_emoji":"","status_expiration":0}}',
     )
   })
@@ -109,45 +119,39 @@ describe('updateSlack', () => {
     })
 
     const result = await updateSlack({
-      isInMeeting: true,
+      ...baseOptions,
+      presenceStatus: 'Do_Not_Disturb',
       workspaces: [
         {
-          name: 'Slack Workspace 1',
+          ...mockExampleConfig[0],
           email: 'your-address@mail.com',
-          token: 'xoxp-xxx-xxx',
-          meetingStatus: {
-            text: "I'm in a meeting",
-            emoji: ':warning:', // emoji code
-          },
-          noMeetingStatus: {
-            text: '',
-            emoji: '',
-          },
         },
       ],
       email: 'your-address@mail.com',
     })
 
-    expect(result[0].request.config.data).toStrictEqual(
+    expect(result.request.config.data).toStrictEqual(
       '{"profile":{"status_text":"I\'m in a meeting","status_emoji":":warning:","status_expiration":0}}',
     )
   })
 
-  it('does not invokes slack api when mail does not match', async () => {
-    const result = await updateSlack({
-      isInMeeting: true,
-      workspaces: [
-        {
-          email: 'another-address@mail.com',
-        },
-      ],
-      email: 'your-address@mail.com',
+  describe('error handling', () => {
+    it('does not invoke slack api when mail does not match', () => {
+      expect(
+        updateSlack({
+          ...baseOptions,
+          presenceStatus: 'Do_Not_Disturb',
+          workspaces: [
+            {
+              ...mockExampleConfig[0],
+              email: 'another-address@mail.com',
+            },
+          ],
+          email: 'your-address@mail.com',
+        }),
+      ).rejects.toBeTruthy()
     })
 
-    expect(result[0]).toBeNull()
-  })
-
-  describe('error handling', () => {
     it('rejects on error', async () => {
       moxios.wait(() => {
         const request = moxios.requests.mostRecent()
@@ -159,7 +163,7 @@ describe('updateSlack', () => {
         })
       })
 
-      await expect(updateSlack()).rejects.toBeTruthy()
+      await expect(updateSlack(baseOptions)).rejects.toBeTruthy()
     })
 
     it('rejects when slack api returns error code', async () => {
@@ -170,29 +174,16 @@ describe('updateSlack', () => {
         })
       })
 
-      await expect(updateSlack()).rejects.toBeTruthy()
+      await expect(updateSlack(baseOptions)).rejects.toBeTruthy()
+    })
+  })
+
+  it('rejects when no workspace matches verificationToken', async () => {
+    moxios.wait(() => {
+      const request = moxios.requests.mostRecent()
+      request.respondWith(DEFAULT_SLACK_RESPONSE)
     })
 
-    it('rejects when any of multiple workspace requests rejects', async () => {
-      moxios.wait(() => {
-        moxios.respondAllWith(
-          {
-            status: 500,
-            response: {},
-          },
-          {
-            status: 200,
-            response: {},
-          },
-        )
-      })
-
-      await expect(
-        updateSlack({
-          isInMeeting: false,
-          workspaces: [...mockExampleConfig, ...mockExampleConfig],
-        }),
-      ).rejects.toBeTruthy()
-    })
+    expect(updateSlack({ verificationToken: 'other' })).rejects.toBeTruthy()
   })
 })

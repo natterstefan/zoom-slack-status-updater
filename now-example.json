@@ -1,7 +1,8 @@
 {
   "version": 2,
   "env": {
-    "SLACK_TOKEN_1": "@slack_token_1"
+    "SLACK_TOKEN_1": "@slack_token_1",
+    "VERIFICATION_TOKEN_1": "@verification_token_1"
   },
   "builds": [{ "src": "/src/index.js", "use": "@now/node-server" }],
   "routes": [

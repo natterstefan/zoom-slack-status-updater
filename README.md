@@ -13,7 +13,7 @@ Update your Slack status automatically when you join a Zoom meeting.
 
 - a Zoom App
 - a Slack App
-- and a ZEIT account
+- and a Vercel account
 
 ## Development
 
@@ -42,8 +42,8 @@ cp now-example.json now.json
 
 ### Step 1 - Setup now.sh
 
-1. Create a [ZEIT account](https://zeit.co/signup)
-2. Run `now login` (login with your ZEIT account) in your terminal
+1. Create a [vercel account](https://vercel.com/signup)
+2. Run `now login` (login with your vercel account) in your terminal
 
 ### Step 2 - Setup Slack
 
@@ -56,6 +56,26 @@ cp now-example.json now.json
 
 ![Create Webhook Only Zoom App](./assets/slack.png)
 
+### Step 3 - Setup Zoom
+
+![Create Webhook Only Zoom App](./assets/zoom_1.png)
+
+[Create a new (or use an existing) "Webhook Only" Zoom app](https://marketplace.zoom.us/develop/create)
+with your Zoom account. Even if you added multiple Slack workspaces, you just
+need one Zoom app.
+
+Fill out the required information and activate `Event Subscriptions`. Add
+the `User’s presence status has been updated` event type. Once you have deployed
+the app to now.sh (in a later step) you can add the
+`Event notification endpoint URL`.
+
+The `Verification Token` is also visible on this page, you need to
+add this to the app configuration in the next step.
+
+![Setup Zoom App](./assets/zoom_2.png)
+
+You can read more about it setting up the App [here](https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated).
+
 ### Step 3 - Configure App
 
 1. Duplicate the [example config](./slack-status-config-example.js) and rename
@@ -64,8 +84,9 @@ cp now-example.json now.json
 2. Create a config object for each slack workspace you want to update when a
    Zoom meeting starts.
 
-You can either use `now secret` for the token values, or copy the token string
-right into the workspace config. I used the secret option described below:
+You can either use `now secret` for the token values, copy the token string
+right into the workspace config or use `process.env.*` by setting the values in
+`.env`. I used the now secret option described below:
 
 #### now secrets
 
@@ -82,16 +103,19 @@ Step 2 - add the secret to `now.json`
 
 ```json
   "env": {
-    "SLACK_TOKEN_1": "@slack_token_1"
+    "SLACK_TOKEN_1": "@slack_token_1",
+    "VERIFICATION_TOKEN_1": "@verification_token_1"
   }
 ```
 
-Step 3 - add `process.env.<secret name>` to your configuration file
+Step 3 - now you can the secret with `process.env.<secret name>` to your
+configuration file
 
 ```js
   {
     name: 'Slack Workspace 1',
     token: process.env.SLACK_TOKEN_1,
+    zoomVerificationToken: process.env.VERIFICATION_TOKEN_1,
     ...
   }
 ```
@@ -121,6 +145,15 @@ module.exports = [
      * process.env.SLACK_TOKEN_1 (now secret add SLACK_TOKEN_1 "xoxp-xxx-xxx")
      */
     token: 'xoxp-xxx-xxx',
+    /**
+     * Zoom Verification Token
+     *
+     * A verification token will be generated in the Feature page after you
+     * enable and save the event subscription.
+     *
+     * @see https://marketplace.zoom.us/docs/api-reference/webhook-reference#headers
+     */
+    zoomVerificationToken: 'Vivamusultricies',
     meetingStatus: {
       text: "I'm in a meeting",
       emoji: ':warning:', // emoji code
@@ -149,21 +182,11 @@ the ZOOM app.
 Tip: Do not use an obvious name for your now.sh URL here, something random or
 other people could mess with your Slack status. 😆
 
-### Step 5 - Setup Zoom
+### Step 5 - Finish Zoom Setup
 
-![Create Webhook Only Zoom App](./assets/zoom_1.png)
-
-[Create a new (or use an existing) "Webhook Only" Zoom app](https://marketplace.zoom.us/develop/create)
-with your Zoom account. Even if you added multiple Slack workspaces, you just
-need one Zoom app.
-
-Fill out the required information and activate `Event Subscriptions`. Add
-the `User’s presence status has been updated` event type and the generated
-now.sh domain for `Event notification endpoint URL`.
+Add the generated now.sh domain as `Event notification endpoint URL`.
 
 ![Setup Zoom App](./assets/zoom_2.png)
-
-You can read more about it setting up the App [here](https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated).
 
 ### Step 6 - Test :)
 
@@ -180,6 +203,9 @@ now
 now your-app --safe --yes
 # deploy and remove previous builds
 now && now rm your-app --safe --yes
+
+# deploy to production
+now --prod
 
 # list all deployments
 now ls

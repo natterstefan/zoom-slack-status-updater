@@ -10,9 +10,14 @@ jest.mock('../slack', () => jest.fn())
 
 describe('app', () => {
   const doRequest = (response) => {
-    const { presence_status = 'Available', email } = response || {}
+    const {
+      presence_status = 'Available',
+      email,
+      authorization = 'Vivamusultricies',
+    } = response || {}
     return request(app)
       .post('/')
+      .set('authorization', authorization)
       .send({
         // @see https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated
         payload: {
@@ -39,33 +44,27 @@ describe('app', () => {
     expect(response.status).toStrictEqual(200)
   })
 
-  it.each([{ presence_status: 'Available' }, { presence_status: 'Away' }])(
-    'invokes updateSlackStatus to "not in a meeting" with %o',
-    async (response) => {
-      await doRequest(response)
-      expect(updateSlackStatus).toHaveBeenCalledWith({
-        isInMeeting: false,
-      })
-    },
-  )
-
-  it.each([{ presence_status: ZOOM_IN_MEETING_STATUS }])(
-    'invokes updateSlackStatus to "in a meeting" with %o',
-    async (response) => {
-      await doRequest(response)
-      expect(updateSlackStatus).toHaveBeenCalledWith({
-        isInMeeting: true,
-      })
-    },
-  )
+  it.each([
+    { presence_status: 'Available' },
+    { presence_status: 'Away' },
+    { presence_status: ZOOM_IN_MEETING_STATUS },
+  ])('invokes updateSlackStatus with %o presenceStatus', async (response) => {
+    await doRequest(response)
+    expect(updateSlackStatus).toHaveBeenCalledWith({
+      email: undefined,
+      presenceStatus: response.presence_status,
+      verificationToken: 'Vivamusultricies',
+    })
+  })
 
   it.each([{ email: 'your-address@mail.com' }, { email: '' }])(
-    'invokes updateSlackStatus with proper email with %o',
+    'invokes updateSlackStatus with %o email',
     async (response) => {
       await doRequest(response)
       expect(updateSlackStatus).toHaveBeenCalledWith({
-        isInMeeting: false,
         email: response.email,
+        presenceStatus: 'Available',
+        verificationToken: 'Vivamusultricies',
       })
     },
   )

@@ -18,22 +18,22 @@ app.use(bodyParser.json())
  * @see https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated
  */
 app.post('/', async (req, res, next) => {
-  logger('ZOOM request', req.body)
+  logger('REQUEST', req.body)
 
-  const currentEmail = get(req, 'body.payload.object.email')
   const currentPresenceStatus = get(req, 'body.payload.object.presence_status')
+  const currentEmail = get(req, 'body.payload.object.email')
+  const verificationToken = get(req, 'headers.authorization')
+
   if (!currentPresenceStatus) {
     return next(new Error('presence_status is not available'))
   }
 
   try {
-    const isInMeeting = currentPresenceStatus === ZOOM_IN_MEETING_STATUS
-    await updateSlackStatus({ isInMeeting, email: currentEmail })
-
-    logger(
-      'SLACK updated',
-      `new slack status '${isInMeeting ? 'in meeting' : 'not in meeting'}'`,
-    )
+    await updateSlackStatus({
+      presenceStatus: currentPresenceStatus,
+      email: currentEmail,
+      verificationToken,
+    })
     res.sendStatus(200)
   } catch (error) {
     return next(new Error(error))
