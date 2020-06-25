@@ -13,7 +13,7 @@ Update your Slack status automatically when you join a Zoom meeting.
 
 - a Zoom App
 - a Slack App
-- and a ZEIT account
+- and a Vercel account
 
 ## Development
 
@@ -42,8 +42,8 @@ cp now-example.json now.json
 
 ### Step 1 - Setup now.sh
 
-1. Create a [ZEIT account](https://zeit.co/signup)
-2. Run `now login` (login with your ZEIT account) in your terminal
+1. Create a [vercel account](https://vercel.com/signup)
+2. Run `now login` (login with your vercel account) in your terminal
 
 ### Step 2 - Setup Slack
 
@@ -55,6 +55,26 @@ cp now-example.json now.json
    in the subsequent step.
 
 ![Create Webhook Only Zoom App](./assets/slack.png)
+
+### Step 3 - Setup Zoom
+
+![Create Webhook Only Zoom App](./assets/zoom_1.png)
+
+[Create a new (or use an existing) "Webhook Only" Zoom app](https://marketplace.zoom.us/develop/create)
+with your Zoom account. Even if you added multiple Slack workspaces, you just
+need one Zoom app.
+
+Fill out the required information and activate `Event Subscriptions`. Add
+the `User’s presence status has been updated` event type. Once you have deployed
+the app to now.sh (in a later step) you can add the
+`Event notification endpoint URL`.
+
+The `Verification Token` is also visible on this page, you need to
+add this to the app configuration in the next step.
+
+![Setup Zoom App](./assets/zoom_2.png)
+
+You can read more about it setting up the App [here](https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated).
 
 ### Step 3 - Configure App
 
@@ -83,7 +103,8 @@ Step 2 - add the secret to `now.json`
 
 ```json
   "env": {
-    "SLACK_TOKEN_1": "@slack_token_1"
+    "SLACK_TOKEN_1": "@slack_token_1",
+    "VERIFICATION_TOKEN_1": "@verification_token_1"
   }
 ```
 
@@ -94,6 +115,7 @@ configuration file
   {
     name: 'Slack Workspace 1',
     token: process.env.SLACK_TOKEN_1,
+    zoomVerificationToken: process.env.VERIFICATION_TOKEN_1,
     ...
   }
 ```
@@ -131,7 +153,7 @@ module.exports = [
      *
      * @see https://marketplace.zoom.us/docs/api-reference/webhook-reference#headers
      */
-    zoomVerificationToken: '',
+    zoomVerificationToken: 'Vivamusultricies',
     meetingStatus: {
       text: "I'm in a meeting",
       emoji: ':warning:', // emoji code
@@ -160,21 +182,11 @@ the ZOOM app.
 Tip: Do not use an obvious name for your now.sh URL here, something random or
 other people could mess with your Slack status. 😆
 
-### Step 5 - Setup Zoom
+### Step 5 - Finish Zoom Setup
 
-![Create Webhook Only Zoom App](./assets/zoom_1.png)
-
-[Create a new (or use an existing) "Webhook Only" Zoom app](https://marketplace.zoom.us/develop/create)
-with your Zoom account. Even if you added multiple Slack workspaces, you just
-need one Zoom app.
-
-Fill out the required information and activate `Event Subscriptions`. Add
-the `User’s presence status has been updated` event type and the generated
-now.sh domain for `Event notification endpoint URL`.
+Add the generated now.sh domain as `Event notification endpoint URL`.
 
 ![Setup Zoom App](./assets/zoom_2.png)
-
-You can read more about it setting up the App [here](https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated).
 
 ### Step 6 - Test :)
 
