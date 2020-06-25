@@ -76,7 +76,7 @@ add this to the app configuration in the next step.
 
 You can read more about it setting up the App [here](https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated).
 
-### Step 3 - Configure App
+### Step 4 - Configure App
 
 1. Duplicate the [example config](./slack-status-config-example.js) and rename
    it to `slack-status-config.js`. This should happen automatically thanks
@@ -166,7 +166,7 @@ module.exports = [
 ]
 ```
 
-### Step 4 - Deploy App to now.sh
+### Step 5 - Deploy App to now.sh
 
 ```bash
 # example questions when setting up the now project for the first time
@@ -179,16 +179,13 @@ This will guide you through the process of creating and deploying the project to
 now.sh. Remember the created URL. You are going to need it in the next step for
 the ZOOM app.
 
-Tip: Do not use an obvious name for your now.sh URL here, something random or
-other people could mess with your Slack status. 😆
-
-### Step 5 - Finish Zoom Setup
+### Step 6 - Finish Zoom Setup
 
 Add the generated now.sh domain as `Event notification endpoint URL`.
 
 ![Setup Zoom App](./assets/zoom_2.png)
 
-### Step 6 - Test :)
+### Step 7 - Test :)
 
 Now, open both Zoom and Slack and watch the status change when you start or
 join a meeting.
