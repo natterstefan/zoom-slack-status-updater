@@ -4,6 +4,15 @@ All notable changes to this project will be documented here. The format is based
 on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project
 adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+## Features
+
+- Resolves [#4](https://github.com/natterstefan/zoom-slack-status-updater/issues/4)),
+  by adding new `zoomVerificationToken` option to config.
+- Only the slack workspace matching the request's `headers.authorization` will
+  be updated, not all anymore
+
 ## 0.2.0 (2020-05-24)
 
 ### Features
