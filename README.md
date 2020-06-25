@@ -48,9 +48,9 @@ cp now-example.json now.json
 ### Step 2 - Setup Slack
 
 1. Create a [Slack App](https://api.slack.com/apps) for your workspace(s)
-2. Grant each app the `users.profile:write` privilege in `User Token Scopes`
-   in the `OAuth Tokens & Redirect URLs` view, before clicking on the "Install
-   App" button.
+2. Grant each app the `users.profile:write` **and** `dnd:write` privilege in
+   `User Token Scopes` in the `OAuth & Permissions` view, before
+   clicking on the "Install App" button.
 3. Copy and paste each `OAuth Access Token` into the configuration file created
    in the subsequent step.
 

@@ -35,8 +35,15 @@ describe('updateSlack', () => {
 
   it('invokes slack api for workspace with matching verificationToken', async () => {
     moxios.wait(() => {
-      const request = moxios.requests.mostRecent()
-      request.respondWith(DEFAULT_SLACK_RESPONSE)
+      moxios.respondAllWith(
+        // updateSlack
+        DEFAULT_SLACK_RESPONSE,
+        // updateSlackDndStatus
+        {
+          status: 200,
+          response: {},
+        },
+      )
     })
 
     const result = await updateSlack(baseOptions)
@@ -46,6 +53,16 @@ describe('updateSlack', () => {
   it('invokes slack api for multiple workspaces', async () => {
     moxios.wait(() => {
       moxios.respondAllWith(
+        // workspace 1
+        {
+          status: 200,
+          response: {},
+        },
+        {
+          status: 200,
+          response: {},
+        },
+        // workspace 2
         {
           status: 200,
           response: {},
@@ -66,24 +83,41 @@ describe('updateSlack', () => {
 
   it('invokes slack api with proper request config', async () => {
     moxios.wait(() => {
-      const request = moxios.requests.mostRecent()
-      request.respondWith(DEFAULT_SLACK_RESPONSE)
+      moxios.respondAllWith(
+        // updateSlack
+        DEFAULT_SLACK_RESPONSE,
+        // updateSlackDndStatus
+        {
+          status: 200,
+          response: {},
+        },
+      )
     })
 
     const result = await updateSlack(baseOptions)
 
-    expect(result.request.config.headers.Authorization).toStrictEqual(
+    expect(result[0].request.config.headers.Authorization).toStrictEqual(
       'Bearer xoxp-xxx-xxx',
     )
-    expect(result.request.config.url).toStrictEqual(
+    expect(result[0].request.config.url).toStrictEqual(
       'https://slack.com/api/users.profile.set',
+    )
+    expect(result[1].request.config.url).toStrictEqual(
+      'https://slack.com/api/dnd.endSnooze',
     )
   })
 
   it('invokes slack api with proper request data when user is in meeting', async () => {
     moxios.wait(() => {
-      const request = moxios.requests.mostRecent()
-      request.respondWith(DEFAULT_SLACK_RESPONSE)
+      moxios.respondAllWith(
+        // updateSlack
+        DEFAULT_SLACK_RESPONSE,
+        // updateSlackDndStatus
+        {
+          status: 200,
+          response: {},
+        },
+      )
     })
 
     const result = await updateSlack({
@@ -91,15 +125,22 @@ describe('updateSlack', () => {
       presenceStatus: 'Do_Not_Disturb',
     })
 
-    expect(result.request.config.data).toStrictEqual(
+    expect(result[0].request.config.data).toStrictEqual(
       '{"profile":{"status_text":"I\'m in a meeting","status_emoji":":warning:","status_expiration":0}}',
     )
   })
 
   it('invokes slack api with proper request data when user is not in a meeting', async () => {
     moxios.wait(() => {
-      const request = moxios.requests.mostRecent()
-      request.respondWith(DEFAULT_SLACK_RESPONSE)
+      moxios.respondAllWith(
+        // updateSlack
+        DEFAULT_SLACK_RESPONSE,
+        // updateSlackDndStatus
+        {
+          status: 200,
+          response: {},
+        },
+      )
     })
 
     const result = await updateSlack({
@@ -107,15 +148,22 @@ describe('updateSlack', () => {
       presenceStatus: 'Available',
     })
 
-    expect(result.request.config.data).toStrictEqual(
+    expect(result[0].request.config.data).toStrictEqual(
       '{"profile":{"status_text":"","status_emoji":"","status_expiration":0}}',
     )
   })
 
   it('invokes slack api with proper request data when user is in meeting and mail matches', async () => {
     moxios.wait(() => {
-      const request = moxios.requests.mostRecent()
-      request.respondWith(DEFAULT_SLACK_RESPONSE)
+      moxios.respondAllWith(
+        // updateSlack
+        DEFAULT_SLACK_RESPONSE,
+        // updateSlackDndStatus
+        {
+          status: 200,
+          response: {},
+        },
+      )
     })
 
     const result = await updateSlack({
@@ -130,7 +178,7 @@ describe('updateSlack', () => {
       email: 'your-address@mail.com',
     })
 
-    expect(result.request.config.data).toStrictEqual(
+    expect(result[0].request.config.data).toStrictEqual(
       '{"profile":{"status_text":"I\'m in a meeting","status_emoji":":warning:","status_expiration":0}}',
     )
   })
