@@ -64,8 +64,9 @@ cp now-example.json now.json
 2. Create a config object for each slack workspace you want to update when a
    Zoom meeting starts.
 
-You can either use `now secret` for the token values, or copy the token string
-right into the workspace config. I used the secret option described below:
+You can either use `now secret` for the token values, copy the token string
+right into the workspace config or use `process.env.*` by setting the values in
+`.env`. I used the now secret option described below:
 
 #### now secrets
 
@@ -86,7 +87,8 @@ Step 2 - add the secret to `now.json`
   }
 ```
 
-Step 3 - add `process.env.<secret name>` to your configuration file
+Step 3 - now you can the secret with `process.env.<secret name>` to your
+configuration file
 
 ```js
   {
@@ -121,6 +123,15 @@ module.exports = [
      * process.env.SLACK_TOKEN_1 (now secret add SLACK_TOKEN_1 "xoxp-xxx-xxx")
      */
     token: 'xoxp-xxx-xxx',
+    /**
+     * Zoom Verification Token
+     *
+     * A verification token will be generated in the Feature page after you
+     * enable and save the event subscription.
+     *
+     * @see https://marketplace.zoom.us/docs/api-reference/webhook-reference#headers
+     */
+    zoomVerificationToken: '',
     meetingStatus: {
       text: "I'm in a meeting",
       emoji: ':warning:', // emoji code
@@ -180,6 +191,9 @@ now
 now your-app --safe --yes
 # deploy and remove previous builds
 now && now rm your-app --safe --yes
+
+# deploy to production
+now --prod
 
 # list all deployments
 now ls

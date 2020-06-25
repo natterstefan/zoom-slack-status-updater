@@ -17,6 +17,15 @@ module.exports = [
      * process.env.SLACK_TOKEN_1 (now secret add SLACK_TOKEN_1 "xoxp-xxx-xxx")
      */
     token: 'xoxp-xxx-xxx',
+    /**
+     * Zoom Verification Token
+     *
+     * A verification token will be generated in the Feature page after you
+     * enable and save the event subscription.
+     *
+     * @see https://marketplace.zoom.us/docs/api-reference/webhook-reference#headers
+     */
+    zoomVerificationToken: 'Vivamusultricies',
     meetingStatus: {
       text: "I'm in a meeting",
       emoji: ':warning:', // emoji code
