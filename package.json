@@ -5,6 +5,7 @@
   "private": true,
   "main": "./src/index.js",
   "scripts": {
+    "coverage": "jest --coverage",
     "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
     "postinstall": "node scripts/copyfile.js",
     "start": "node .",
@@ -24,7 +25,8 @@
     "body-parser": "^1.19.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "lodash.get": "^4.4.2"
+    "lodash.get": "^4.4.2",
+    "qs": "^6.9.4"
   },
   "devDependencies": {
     "@types/jest": "^26.0.3",
