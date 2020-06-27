@@ -10,8 +10,8 @@ adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 - `zoomVerificationToken` ensures hook can only be triggered by valid Zoom app
   (resolve [#4](https://github.com/natterstefan/zoom-slack-status-updater/issues/4))
-- Only the slack workspace matching the request's `headers.authorization` will
-  be updated, not multiple at once anymore
+- Only slack workspaces with a `zoomVerificationToken` matching the request's
+  `headers.authorization` will be updated
 - set do not disturb when joining Zoom meetings with the new `dndNumMinutes`
   setting
 
