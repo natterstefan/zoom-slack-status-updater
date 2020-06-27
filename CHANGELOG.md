@@ -6,7 +6,7 @@ adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## 0.3.0 (2020-06-27)
 
-## Features
+### Features
 
 - `zoomVerificationToken` ensures hook can only be triggered by valid Zoom app
   (resolve [#4](https://github.com/natterstefan/zoom-slack-status-updater/issues/4))
