@@ -31,6 +31,7 @@ const updateSlackStatus = async (workspace, { token, text, emoji }) => {
         },
       },
     )
+
     if (response.data.error) {
       throw new Error(response.data.error)
     }
@@ -50,10 +51,8 @@ const updateSlackStatus = async (workspace, { token, text, emoji }) => {
  *
  * @see https://api.slack.com/methods/dnd.setSnooze
  * @see https://api.slack.com/methods/dnd.endSnooze
- *
- * TODO: add tests
  */
-const updateSlackDndStatus = async (workspace, { token, snooze = false }) => {
+const updateSlackDndStatus = async (workspace, { token, snooze }) => {
   try {
     let config = {}
 

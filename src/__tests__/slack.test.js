@@ -6,7 +6,10 @@ const updateSlack = require('../slack')
 jest.mock('../logger')
 jest.mock('../../slack-status-config', () => mockExampleConfig)
 
-const baseOptions = { verificationToken: 'Vivamusultricies' }
+const baseOptions = {
+  verificationToken: 'Vivamusultricies',
+  presenceStatus: 'Do_Not_Disturb',
+}
 
 describe('updateSlack', () => {
   const DEFAULT_SLACK_RESPONSE = {
@@ -81,114 +84,168 @@ describe('updateSlack', () => {
     expect(result).toBeTruthy()
   })
 
-  it('invokes slack api with proper request config', async () => {
-    moxios.wait(() => {
-      moxios.respondAllWith(
-        // updateSlack
-        DEFAULT_SLACK_RESPONSE,
-        // updateSlackDndStatus
-        {
-          status: 200,
-          response: {},
-        },
+  describe('updateSlackStatus', () => {
+    it('invokes slack api with proper request header', async () => {
+      moxios.wait(() => {
+        moxios.respondAllWith(DEFAULT_SLACK_RESPONSE, DEFAULT_SLACK_RESPONSE)
+      })
+
+      const result = await updateSlack(baseOptions)
+
+      expect(result[0].request.config.headers.Authorization).toStrictEqual(
+        'Bearer xoxp-xxx-xxx',
       )
     })
 
-    const result = await updateSlack(baseOptions)
+    it('sets proper slack status when user is in Do_Not_Disturb mode', async () => {
+      moxios.wait(() => {
+        moxios.respondAllWith(
+          // updateSlack
+          DEFAULT_SLACK_RESPONSE,
+          // updateSlackDndStatus
+          {
+            status: 200,
+            response: {},
+          },
+        )
+      })
 
-    expect(result[0].request.config.headers.Authorization).toStrictEqual(
-      'Bearer xoxp-xxx-xxx',
-    )
-    expect(result[0].request.config.url).toStrictEqual(
-      'https://slack.com/api/users.profile.set',
-    )
-    expect(result[1].request.config.url).toStrictEqual(
-      'https://slack.com/api/dnd.endSnooze',
-    )
+      const result = await updateSlack(baseOptions)
+
+      expect(result[0].request.config.data).toStrictEqual(
+        '{"profile":{"status_text":"I\'m in a meeting","status_emoji":":warning:","status_expiration":0}}',
+      )
+    })
+
+    it('sets proper slack status when user is is not in Do_Not_Disturb mode', async () => {
+      moxios.wait(() => {
+        moxios.respondAllWith(
+          // updateSlack
+          DEFAULT_SLACK_RESPONSE,
+          // updateSlackDndStatus
+          {
+            status: 200,
+            response: {},
+          },
+        )
+      })
+
+      const result = await updateSlack({
+        ...baseOptions,
+        presenceStatus: 'Available',
+      })
+
+      expect(result[0].request.config.data).toStrictEqual(
+        '{"profile":{"status_text":"","status_emoji":"","status_expiration":0}}',
+      )
+    })
+
+    it('sets proper slack status when user is is in Do_Not_Disturb mode and mail matches', async () => {
+      moxios.wait(() => {
+        moxios.respondAllWith(
+          // updateSlack
+          DEFAULT_SLACK_RESPONSE,
+          // updateSlackDndStatus
+          {
+            status: 200,
+            response: {},
+          },
+        )
+      })
+
+      const result = await updateSlack({
+        ...baseOptions,
+        workspaces: [
+          {
+            ...mockExampleConfig[0],
+            email: 'your-address@mail.com',
+          },
+        ],
+        email: 'your-address@mail.com',
+      })
+
+      expect(result[0].request.config.data).toStrictEqual(
+        '{"profile":{"status_text":"I\'m in a meeting","status_emoji":":warning:","status_expiration":0}}',
+      )
+    })
+
+    it.each([
+      {
+        status: 200,
+        response: {
+          error: 'some error occured',
+        },
+      },
+      {
+        status: 500,
+      },
+    ])('rejects on error with the %o response', async (response) => {
+      moxios.wait(() => {
+        moxios.respondAllWith(response)
+      })
+      await expect(updateSlack(baseOptions)).rejects.toBeTruthy()
+    })
   })
 
-  it('invokes slack api with proper request data when user is in meeting', async () => {
-    moxios.wait(() => {
-      moxios.respondAllWith(
-        // updateSlack
-        DEFAULT_SLACK_RESPONSE,
-        // updateSlackDndStatus
-        {
-          status: 200,
-          response: {},
-        },
+  describe('updateSlackDndStatus', () => {
+    it('invokes slack api with proper request header', async () => {
+      moxios.wait(() => {
+        moxios.respondAllWith(DEFAULT_SLACK_RESPONSE, DEFAULT_SLACK_RESPONSE)
+      })
+
+      const result = await updateSlack(baseOptions)
+      expect(result[1].request.config.headers.Authorization).toStrictEqual(
+        'Bearer xoxp-xxx-xxx',
       )
     })
 
-    const result = await updateSlack({
-      ...baseOptions,
-      presenceStatus: 'Do_Not_Disturb',
-    })
+    it.each`
+      presenceStatus      | expected
+      ${'Do_Not_Disturb'} | ${'https://slack.com/api/dnd.setSnooze'}
+      ${'Available'}      | ${'https://slack.com/api/dnd.endSnooze'}
+      ${'Away'}           | ${'https://slack.com/api/dnd.endSnooze'}
+    `(
+      'sets proper dnd status when user is in $presenceStatus mode',
+      async ({ presenceStatus, expected }) => {
+        moxios.wait(() => {
+          moxios.respondAllWith(DEFAULT_SLACK_RESPONSE, DEFAULT_SLACK_RESPONSE)
+        })
 
-    expect(result[0].request.config.data).toStrictEqual(
-      '{"profile":{"status_text":"I\'m in a meeting","status_emoji":":warning:","status_expiration":0}}',
+        let result = await updateSlack({ ...baseOptions, presenceStatus })
+        expect(result[1].request.config.url).toStrictEqual(expected)
+        expect(result[1].request.config.headers['Content-Type']).toStrictEqual(
+          'application/x-www-form-urlencoded',
+        )
+      },
     )
-  })
 
-  it('invokes slack api with proper request data when user is not in a meeting', async () => {
-    moxios.wait(() => {
-      moxios.respondAllWith(
-        // updateSlack
-        DEFAULT_SLACK_RESPONSE,
-        // updateSlackDndStatus
-        {
-          status: 200,
-          response: {},
+    it.each([
+      {
+        status: 200,
+        response: {
+          error: 'some error occured',
         },
-      )
+      },
+      {
+        status: 500,
+      },
+    ])('rejects on error with the %o response', async (response) => {
+      moxios.wait(() => {
+        moxios.respondAllWith(DEFAULT_SLACK_RESPONSE, response)
+      })
+      await expect(updateSlack(baseOptions)).rejects.toBeTruthy()
     })
-
-    const result = await updateSlack({
-      ...baseOptions,
-      presenceStatus: 'Available',
-    })
-
-    expect(result[0].request.config.data).toStrictEqual(
-      '{"profile":{"status_text":"","status_emoji":"","status_expiration":0}}',
-    )
-  })
-
-  it('invokes slack api with proper request data when user is in meeting and mail matches', async () => {
-    moxios.wait(() => {
-      moxios.respondAllWith(
-        // updateSlack
-        DEFAULT_SLACK_RESPONSE,
-        // updateSlackDndStatus
-        {
-          status: 200,
-          response: {},
-        },
-      )
-    })
-
-    const result = await updateSlack({
-      ...baseOptions,
-      presenceStatus: 'Do_Not_Disturb',
-      workspaces: [
-        {
-          ...mockExampleConfig[0],
-          email: 'your-address@mail.com',
-        },
-      ],
-      email: 'your-address@mail.com',
-    })
-
-    expect(result[0].request.config.data).toStrictEqual(
-      '{"profile":{"status_text":"I\'m in a meeting","status_emoji":":warning:","status_expiration":0}}',
-    )
   })
 
   describe('error handling', () => {
+    it('rejects when no options were provided', async () => {
+      expect(updateSlack()).rejects.toBeTruthy()
+    })
+
     it('does not invoke slack api when mail does not match', () => {
       expect(
         updateSlack({
           ...baseOptions,
-          presenceStatus: 'Do_Not_Disturb',
           workspaces: [
             {
               ...mockExampleConfig[0],
@@ -200,38 +257,12 @@ describe('updateSlack', () => {
       ).rejects.toBeTruthy()
     })
 
-    it('rejects on error', async () => {
+    it('rejects when no workspace matches verificationToken', async () => {
       moxios.wait(() => {
-        const request = moxios.requests.mostRecent()
-        request.respondWith({
-          status: 200,
-          response: {
-            error: 'some error occured',
-          },
-        })
+        moxios.respondAllWith(DEFAULT_SLACK_RESPONSE)
       })
 
-      await expect(updateSlack(baseOptions)).rejects.toBeTruthy()
+      expect(updateSlack({ verificationToken: 'other' })).rejects.toBeTruthy()
     })
-
-    it('rejects when slack api returns error code', async () => {
-      moxios.wait(() => {
-        const request = moxios.requests.mostRecent()
-        request.respondWith({
-          status: 500,
-        })
-      })
-
-      await expect(updateSlack(baseOptions)).rejects.toBeTruthy()
-    })
-  })
-
-  it('rejects when no workspace matches verificationToken', async () => {
-    moxios.wait(() => {
-      const request = moxios.requests.mostRecent()
-      request.respondWith(DEFAULT_SLACK_RESPONSE)
-    })
-
-    expect(updateSlack({ verificationToken: 'other' })).rejects.toBeTruthy()
   })
 })
