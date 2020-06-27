@@ -154,6 +154,15 @@ module.exports = [
      * @see https://marketplace.zoom.us/docs/api-reference/webhook-reference#headers
      */
     zoomVerificationToken: 'Vivamusultricies',
+    /**
+     * Slack DnD Status
+     *
+     * Turns on Do Not Disturb mode for the current user. Number of minutes,
+     * from now, to snooze until.
+     *
+     * @see https://api.slack.com/methods/dnd.setSnooze
+     */
+    dndNumMinutes: 60,
     meetingStatus: {
       text: "I'm in a meeting",
       emoji: ':warning:', // emoji code
@@ -210,9 +219,9 @@ now ls
 
 ## Other solutions
 
-- https://github.com/cmmarslender/zoom-status
-- https://github.com/mivok/slack_status_updater with [hammerspoon](http://macappstore.org/hammerspoon/)
-- https://github.com/chrisscott/ZoomSlack
+- <https://github.com/cmmarslender/zoom-status>
+- <https://github.com/mivok/slack_status_updater> with [hammerspoon](http://macappstore.org/hammerspoon/)
+- <https://github.com/chrisscott/ZoomSlack>
 - [How to automatically update your Slack status with Zapier](https://zapier.com/blog/automate-slack-status/)
 
 ## References
@@ -247,4 +256,5 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors)
+specification. Contributions of any kind welcome!

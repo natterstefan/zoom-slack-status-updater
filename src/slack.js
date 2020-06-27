@@ -47,12 +47,15 @@ const updateSlackStatus = async (workspace, { token, text, emoji }) => {
  * Update slack's dnd status
  *
  * @param {*} workspace
- * @param {*} options contains token (string) and snooze (boolean)
+ * @param {*} options contains token (string), numMinutes (number) and snooze (boolean)
  *
  * @see https://api.slack.com/methods/dnd.setSnooze
  * @see https://api.slack.com/methods/dnd.endSnooze
  */
-const updateSlackDndStatus = async (workspace, { token, snooze }) => {
+const updateSlackDndStatus = async (
+  workspace,
+  { token, numMinutes, snooze },
+) => {
   try {
     let config = {}
 
@@ -61,9 +64,7 @@ const updateSlackDndStatus = async (workspace, { token, snooze }) => {
         config = {
           url: 'https://slack.com/api/dnd.setSnooze',
           data: qs.stringify({
-            // TODO: make configurable
-            // 1h by default, will be resetted as soon the Zoom meeting is stopped
-            num_minutes: 60,
+            num_minutes: numMinutes,
           }),
         }
         break
@@ -125,18 +126,22 @@ module.exports = async (options) => {
     const isInMeeting = presenceStatus === ZOOM_IN_MEETING_STATUS
     const status = isInMeeting ? 'meetingStatus' : 'noMeetingStatus'
 
-    return axios.all([
-      updateSlackStatus(workspaceToUpdate, {
-        token: workspaceToUpdate.token,
-        text: workspaceToUpdate[status].text,
-        emoji: workspaceToUpdate[status].emoji,
-      }),
-      // TODO: conditionally enable in config
-      updateSlackDndStatus(workspaceToUpdate, {
-        token: workspaceToUpdate.token,
-        snooze: isInMeeting,
-      }),
-    ])
+    return axios.all(
+      [
+        updateSlackStatus(workspaceToUpdate, {
+          token: workspaceToUpdate.token,
+          text: workspaceToUpdate[status].text,
+          emoji: workspaceToUpdate[status].emoji,
+        }),
+        // only change DnD when workspace configured dndNumMinutes
+        workspaceToUpdate.dndNumMinutes > 0 &&
+          updateSlackDndStatus(workspaceToUpdate, {
+            numMinutes: workspaceToUpdate.dndNumMinutes,
+            snooze: isInMeeting,
+            token: workspaceToUpdate.token,
+          }),
+      ].filter(Boolean),
+    )
   } else {
     logger(
       'SLACK',

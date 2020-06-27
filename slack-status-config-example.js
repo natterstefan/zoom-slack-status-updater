@@ -26,6 +26,15 @@ module.exports = [
      * @see https://marketplace.zoom.us/docs/api-reference/webhook-reference#headers
      */
     zoomVerificationToken: 'Vivamusultricies',
+    /**
+     * Slack DnD Status
+     *
+     * Turns on Do Not Disturb mode for the current user. Number of minutes,
+     * from now, to snooze until.
+     *
+     * @see https://api.slack.com/methods/dnd.setSnooze
+     */
+    dndNumMinutes: 60,
     meetingStatus: {
       text: "I'm in a meeting",
       emoji: ':warning:', // emoji code

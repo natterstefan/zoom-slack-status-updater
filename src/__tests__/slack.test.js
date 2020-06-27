@@ -42,10 +42,7 @@ describe('updateSlack', () => {
         // updateSlack
         DEFAULT_SLACK_RESPONSE,
         // updateSlackDndStatus
-        {
-          status: 200,
-          response: {},
-        },
+        DEFAULT_SLACK_RESPONSE,
       )
     })
 
@@ -57,23 +54,11 @@ describe('updateSlack', () => {
     moxios.wait(() => {
       moxios.respondAllWith(
         // workspace 1
-        {
-          status: 200,
-          response: {},
-        },
-        {
-          status: 200,
-          response: {},
-        },
+        DEFAULT_SLACK_RESPONSE,
+        DEFAULT_SLACK_RESPONSE,
         // workspace 2
-        {
-          status: 200,
-          response: {},
-        },
-        {
-          status: 200,
-          response: {},
-        },
+        DEFAULT_SLACK_RESPONSE,
+        DEFAULT_SLACK_RESPONSE,
       )
     })
 
@@ -82,6 +67,27 @@ describe('updateSlack', () => {
       workspaces: [...mockExampleConfig, ...mockExampleConfig],
     })
     expect(result).toBeTruthy()
+  })
+
+  it('invokes both updateSlackStatus and updateSlackDndStatus', async () => {
+    moxios.wait(() => {
+      moxios.respondAllWith(DEFAULT_SLACK_RESPONSE, DEFAULT_SLACK_RESPONSE)
+    })
+
+    const result = await updateSlack(baseOptions)
+    expect(result).toHaveLength(2)
+  })
+
+  it('invokes only updateSlackStatus when dndNumMinutes is not configured for workspace', async () => {
+    moxios.wait(() => {
+      moxios.respondAllWith(DEFAULT_SLACK_RESPONSE)
+    })
+
+    const result = await updateSlack({
+      ...baseOptions,
+      workspaces: [{ ...mockExampleConfig[0], dndNumMinutes: 0 }],
+    })
+    expect(result).toHaveLength(1)
   })
 
   describe('updateSlackStatus', () => {
@@ -99,15 +105,7 @@ describe('updateSlack', () => {
 
     it('sets proper slack status when user is in Do_Not_Disturb mode', async () => {
       moxios.wait(() => {
-        moxios.respondAllWith(
-          // updateSlack
-          DEFAULT_SLACK_RESPONSE,
-          // updateSlackDndStatus
-          {
-            status: 200,
-            response: {},
-          },
-        )
+        moxios.respondAllWith(DEFAULT_SLACK_RESPONSE, DEFAULT_SLACK_RESPONSE)
       })
 
       const result = await updateSlack(baseOptions)
@@ -119,15 +117,7 @@ describe('updateSlack', () => {
 
     it('sets proper slack status when user is is not in Do_Not_Disturb mode', async () => {
       moxios.wait(() => {
-        moxios.respondAllWith(
-          // updateSlack
-          DEFAULT_SLACK_RESPONSE,
-          // updateSlackDndStatus
-          {
-            status: 200,
-            response: {},
-          },
-        )
+        moxios.respondAllWith(DEFAULT_SLACK_RESPONSE, DEFAULT_SLACK_RESPONSE)
       })
 
       const result = await updateSlack({
@@ -142,15 +132,7 @@ describe('updateSlack', () => {
 
     it('sets proper slack status when user is is in Do_Not_Disturb mode and mail matches', async () => {
       moxios.wait(() => {
-        moxios.respondAllWith(
-          // updateSlack
-          DEFAULT_SLACK_RESPONSE,
-          // updateSlackDndStatus
-          {
-            status: 200,
-            response: {},
-          },
-        )
+        moxios.respondAllWith(DEFAULT_SLACK_RESPONSE, DEFAULT_SLACK_RESPONSE)
       })
 
       const result = await updateSlack({
