@@ -19,10 +19,10 @@ Update your Slack status automatically when you join a Zoom meeting.
 
 ### Installation
 
-Make sure you have `now` and all dependencies installed.
+Make sure you have `vercel` and all dependencies installed.
 
 ```bash
-npm install -g now
+npm i -g vercel@latest
 yarn install # or npm install
 ```
 
@@ -32,27 +32,23 @@ yarn install # or npm install
 yarn test
 ```
 
-## Setup & Deployment
+## Setup
 
-Before you start, create your own `now.json` (if it does not exist already):
-
-```bash
-cp now-example.json now.json
-```
-
-### Step 1 - Setup now.sh
+### Step 1 - Setup Vercel
 
 1. Create a [vercel account](https://vercel.com/signup)
-2. Run `now login` (login with your vercel account) in your terminal
+2. Run `vercel login` (login with your vercel account) in your terminal
+3. Create a project (either [in the Browser](https://vercel.com/new)) or with
+   the CLI (see Step 5 below).
 
 ### Step 2 - Setup Slack
 
 1. Create a [Slack App](https://api.slack.com/apps) for your workspace(s)
-2. Grant each app the `users.profile:write` **and** `dnd:write` privilege in
-   `User Token Scopes` in the `OAuth & Permissions` view, before
-   clicking on the "Install App" button.
-3. Copy and paste each `OAuth Access Token` into the configuration file created
-   in the subsequent step.
+2. Grant each Slack app the `users.profile:write` **and** `dnd:write` privilege
+   in `User Token Scopes` in the `OAuth & Permissions` view, before clicking on
+   the "Install App" button.
+3. Copy and paste each Slack app's `OAuth Access Token` into the configuration
+   file created in the subsequent step.
 
 ![Create Webhook Only Zoom App](./assets/slack.png)
 
@@ -64,163 +60,116 @@ cp now-example.json now.json
 with your Zoom account. Even if you added multiple Slack workspaces, you just
 need one Zoom app.
 
-Fill out the required information and activate `Event Subscriptions`. Add
-the `User’s presence status has been updated` event type. Once you have deployed
-the app to now.sh (in a later step) you can add the
+Fill out the required information and activate `Event Subscriptions`. Add the
+`User’s presence status has been updated` event type. Once you have deployed the
+app to now.sh (in a later step) you can add the
 `Event notification endpoint URL`.
 
-The `Verification Token` is also visible on this page, you need to
-add this to the app configuration in the next step.
+The `Verification Token` is also visible on this page, you need to add this to
+the app configuration in the next step.
 
 ![Setup Zoom App](./assets/zoom_2.png)
 
-You can read more about it setting up the App [here](https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated).
+You can read more about it setting up the App
+[here](https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated).
 
-### Step 4 - Configure App
+### Step 4 - Configure Zoom-Slack-Status-Updater App
 
-1. Duplicate the [example config](./slack-status-config-example.js) and rename
-   it to `slack-status-config.js`. This should happen automatically thanks
-   to a `postinstall` script.
-2. Create a config object for each slack workspace you want to update when a
-   Zoom meeting starts.
+1. Duplicate [slack-status-config-example.js](./slack-status-config-example.js)
+   and rename it to `slack-status-config.js`. This should happen automatically
+   thanks to a `postinstall` script.
+2. Now you have to create a config object for each slack workspace you want to
+   update when a Zoom meeting starts. In the next step you will get to know how
+   to add environment variables (for your tokens)
 
-You can either use `now secret` for the token values, copy the token string
-right into the workspace config or use `process.env.*` by setting the values in
-`.env`. I used the now secret option described below:
+#### Environment Variables
 
-#### now secrets
+Do not copy and paste your Slack app and other tokens into the
+`slack-status-config.js` directly. Instead set up
+[environment variables on Vercel](https://vercel.com/docs/environment-variables).
 
-When working with [`now secret`](https://zeit.co/docs/v2/build-step#using-environment-variables-and-secrets)
-you need to do the following for _each_ secret (aka Slack app token):
-
-Step 1 - create a secret
-
-```bash
-now secret add SLACK_TOKEN_1 "xoxp-xxx-xxx"
-```
-
-Step 2 - add the secret to `now.json`
-
-```json
-  "env": {
-    "SLACK_TOKEN_1": "@slack_token_1",
-    "VERIFICATION_TOKEN_1": "@verification_token_1"
-  }
-```
-
-Step 3 - now you can the secret with `process.env.<secret name>` to your
-configuration file
+- Step 1 - Open the Project Settings of your Vercel app and select "Environment
+  Variables".
+- Step 2 - Choose between a **Plaintext** or **Secret** for the tokens. I
+  recommend you set up and use **Secret**. Because they are encrypted. Remember
+  the name of the Environment variable and add it to the respective workspace in
+  the configuration file.
+- Step 3 - Now add the Environment variable (e.g.
+  `process.env.<enviroment variable name>`) to your configuration file
 
 ```js
   {
     name: 'Slack Workspace 1',
-    token: process.env.SLACK_TOKEN_1,
-    zoomVerificationToken: process.env.VERIFICATION_TOKEN_1,
-    ...
+    token: process.env.SLACK_TOKEN,
+    zoomVerificationToken: process.env.VERIFICATION_TOKEN,
+    // other configuration settings
   }
 ```
 
 #### Example configuration
 
-You can add as many slack workspaces as you want here, just make sure you have
-created an app for each of them.
+You can add as many Slack workspaces as you want here, just make sure you have
+created a Slack app for each workspace.
 
-```js
-module.exports = [
-  /**
-   * You can add as many slack workspaces as you want here, just make sure
-   * you have created an app for each of them.
-   */
-  {
-    // this name can be anything and is only for you, it is not used in the app
-    name: 'Slack Workspace 1',
-    /**
-     * this is the email address of your zoom user
-     * events are filtered and slack updates are only done for this user
-     * remove, if filtering is not intended
-     */
-    email: 'your-address@mail.com',
-    /**
-     * either copy & paste the token string here or use
-     * process.env.SLACK_TOKEN_1 (now secret add SLACK_TOKEN_1 "xoxp-xxx-xxx")
-     */
-    token: 'xoxp-xxx-xxx',
-    /**
-     * Zoom Verification Token
-     *
-     * A verification token will be generated in the Feature page after you
-     * enable and save the event subscription.
-     *
-     * @see https://marketplace.zoom.us/docs/api-reference/webhook-reference#headers
-     */
-    zoomVerificationToken: 'Vivamusultricies',
-    /**
-     * Slack DnD Status
-     *
-     * Turns on Do Not Disturb mode for the current user. Number of minutes,
-     * from now, to snooze until.
-     *
-     * @see https://api.slack.com/methods/dnd.setSnooze
-     */
-    dndNumMinutes: 60,
-    meetingStatus: {
-      text: "I'm in a meeting",
-      emoji: ':warning:', // emoji code
-    },
-    noMeetingStatus: {
-      text: '',
-      emoji: '',
-    },
-  },
-]
-```
+Here ist the [example configuration](./slack-status-config-example.js).
 
-### Step 5 - Deploy App to now.sh
+### Step 5 - Deploy App to Vercel
 
 ```bash
 # example questions when setting up the now project for the first time
 # What’s your project’s name? your-app-name
 # In which directory is your code located? ./
-now
+vercel
 ```
 
-This will guide you through the process of creating and deploying the project to
-now.sh. Remember the created URL. You are going to need it in the next step for
-the ZOOM app.
+This will guide you through the process of creating and deploying the project.
+Remember the created Deployment URL. You are going to need it in the next step
+for the ZOOM app.
+
+You find the deployment URL in your Project under the "Deployments" tab (example
+URL: <https://vercel.com/username/projectname/deployments>) or in the "Settings"
+tab and then "Domains"
+(<https://vercel.com/username/projectname/settings/domains)>).
+
+Make sure you select the one that looks like: <https://projectname.now.sh/>,
+whereas `projectname` is the name of your project. This will point to the latest
+deployed version of your app. If you choose another URL you would need to update
+Zoom (see Step 6) after each deployment.
 
 ### Step 6 - Finish Zoom Setup
 
-Add the generated now.sh domain as `Event notification endpoint URL`.
+Add the generated vercel URL as `Event notification endpoint URL`.
 
 ![Setup Zoom App](./assets/zoom_2.png)
 
-### Step 7 - Test :)
+### Step 7 - Run and Test
 
-Now, open both Zoom and Slack and watch the status change when you start or
-join a meeting.
+Now, open both Zoom and Slack and watch the status change when you start or join
+a meeting.
 
-## now commands
+You do not need a second account for that. Open Zoom, start a new meeting and
+you should see the new status on Slack.
+
+## vercel commands
 
 ```bash
-# deploy to now
-now
+# deploy to vercel
+vercel
 
-# remove previous deployments from now.sh
-now your-app --safe --yes
+# remove previous deployments
+vercel your-app --safe --yes
 # deploy and remove previous builds
-now && now rm your-app --safe --yes
-
-# deploy to production
-now --prod
+vercel && vercel rm your-app --safe --yes
 
 # list all deployments
-now ls
+vercel ls
 ```
 
 ## Other solutions
 
 - <https://github.com/cmmarslender/zoom-status>
-- <https://github.com/mivok/slack_status_updater> with [hammerspoon](http://macappstore.org/hammerspoon/)
+- <https://github.com/mivok/slack_status_updater> with
+  [hammerspoon](http://macappstore.org/hammerspoon/)
 - <https://github.com/chrisscott/ZoomSlack>
 - [How to automatically update your Slack status with Zapier](https://zapier.com/blog/automate-slack-status/)
 
@@ -239,7 +188,8 @@ now ls
 
 ## Contributors ✨
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks goes to these wonderful people
+([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -256,5 +206,6 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors)
+This project follows the
+[all-contributors](https://github.com/all-contributors/all-contributors)
 specification. Contributions of any kind welcome!
