@@ -52,28 +52,7 @@ yarn test
 
 ![Create Webhook Only Zoom App](./assets/slack.png)
 
-### Step 3 - Setup Zoom
-
-![Create Webhook Only Zoom App](./assets/zoom_1.png)
-
-[Create a new (or use an existing) "Webhook Only" Zoom app](https://marketplace.zoom.us/develop/create)
-with your Zoom account. Even if you added multiple Slack workspaces, you just
-need one Zoom app.
-
-Fill out the required information and activate `Event Subscriptions`. Add the
-`User’s presence status has been updated` event type. Once you have deployed the
-app to now.sh (in a later step) you can add the
-`Event notification endpoint URL`.
-
-The `Verification Token` is also visible on this page, you need to add this to
-the app configuration in the next step.
-
-![Setup Zoom App](./assets/zoom_2.png)
-
-You can read more about it setting up the App
-[here](https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated).
-
-### Step 4 - Configure Zoom-Slack-Status-Updater App
+### Step 3 - Configure Zoom-Slack-Status-Updater App
 
 1. Duplicate [slack-status-config-example.js](./slack-status-config-example.js)
    and rename it to `slack-status-config.js`. This should happen automatically
@@ -101,6 +80,7 @@ Do not copy and paste your Slack app and other tokens into the
   {
     name: 'Slack Workspace 1',
     token: process.env.SLACK_TOKEN,
+    // see Step 6 for more details about how to obtain this token
     zoomVerificationToken: process.env.VERIFICATION_TOKEN,
     // other configuration settings
   }
@@ -136,11 +116,38 @@ whereas `projectname` is the name of your project. This will point to the latest
 deployed version of your app. If you choose another URL you would need to update
 Zoom (see Step 6) after each deployment.
 
-### Step 6 - Finish Zoom Setup
+### Step 6 - Setup Zoom
 
-Add the generated vercel URL as `Event notification endpoint URL`.
+![Create Webhook Only Zoom App](./assets/zoom_1.png)
+
+[Create a new (or use an existing) "Webhook Only" Zoom app](https://marketplace.zoom.us/develop/create)
+with your Zoom account. Even if you added multiple Slack workspaces, you just
+need one Zoom app.
+
+Fill out the required information and activate `Event Subscriptions`. Add the
+`User’s presence status has been updated` event type. Once you have deployed the
+app to now.sh (in a later step) you can add the
+`Event notification endpoint URL`.
+
+The `Verification Token` is also visible on this page, you need to add this to
+the app configuration in the next step.
 
 ![Setup Zoom App](./assets/zoom_2.png)
+
+You can read more about it setting up the App
+[here](https://marketplace.zoom.us/docs/api-reference/webhook-reference/user-events/presence-status-updated).
+
+Add the generated vercel URL from Step 5 as your
+`Event notification endpoint URL`.
+
+![Setup Zoom App](./assets/zoom_2.png)
+
+> A verification token will be generated in the Feature page after you enable
+> and save the event subscription. This token can be used to validate the POST
+> requests that are sent by Zoom to your event notification endpoint URL.
+> ([source](https://marketplace.zoom.us/docs/guides/build/webhook-only-app#features-2))
+
+Get this verification token and add it to the configuration file, see Step 3.
 
 ### Step 7 - Run and Test
 
