@@ -1,13 +1,16 @@
+const path = require('path')
 const moxios = require('moxios')
 
 const mockExampleConfig = require('../../slack-status-config-example')
 const updateSlack = require('../slack')
 
+require('dotenv').config()
+
 jest.mock('../logger')
 jest.mock('../../slack-status-config', () => mockExampleConfig)
 
 const baseOptions = {
-  verificationToken: 'Vivamusultricies',
+  verificationToken: process.env.VERIFICATION_TOKEN,
   presenceStatus: 'Do_Not_Disturb',
 }
 
@@ -99,7 +102,7 @@ describe('updateSlack', () => {
       const result = await updateSlack(baseOptions)
 
       expect(result[0].request.config.headers.Authorization).toStrictEqual(
-        'Bearer xoxp-xxx-xxx',
+        'Bearer ' + process.env.SLACK_TOKEN,
       )
     })
 
@@ -177,7 +180,7 @@ describe('updateSlack', () => {
 
       const result = await updateSlack(baseOptions)
       expect(result[1].request.config.headers.Authorization).toStrictEqual(
-        'Bearer xoxp-xxx-xxx',
+        'Bearer ' + process.env.SLACK_TOKEN,
       )
     })
 

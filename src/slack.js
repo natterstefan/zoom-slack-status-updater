@@ -109,6 +109,7 @@ module.exports = async (options) => {
     verificationToken,
     workspaces = slackWorkspaces,
   } = options || {}
+
   const workspaceToUpdate = workspaces.find(
     (workspace) => workspace.zoomVerificationToken === verificationToken,
   )

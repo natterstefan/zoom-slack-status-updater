@@ -55,8 +55,9 @@ yarn test
 ### Step 3 - Configure Zoom-Slack-Status-Updater App
 
 1. Duplicate [slack-status-config-example.js](./slack-status-config-example.js)
-   and rename it to `slack-status-config.js`. This should happen automatically
-   thanks to a `postinstall` script.
+   and rename it to `slack-status-config.js`. Do the same with `.env.example`
+   and rename it to `.env`. This should happen automatically thanks to a
+   `postinstall` script.
 2. Now you have to create a config object for each slack workspace you want to
    update when a Zoom meeting starts. In the next step you will get to know how
    to add environment variables (for your tokens)

@@ -1,25 +1,32 @@
 const fs = require('fs')
 const path = require('path')
 
-const exampleFile = path.join(__dirname, '../slack-status-config-example.js')
-const configFile = path.join(__dirname, '../slack-status-config.js')
+const exampleFiles = [
+  path.join(__dirname, '../slack-status-config-example.js'),
+  path.join(__dirname, '../.env.example'),
+]
+const configFiles = [
+  path.join(__dirname, '../slack-status-config.js'),
+  path.join(__dirname, '../.env'),
+]
 
 /**
  * prepare the app config based on the given example config file.
  */
-fs.exists(configFile, (exists) => {
-  if (exists) {
-    console.log('slack-status-config.js exists already.')
-    return
-  }
 
-  fs.copyFile(exampleFile, configFile, (err) => {
-    if (err) {
-      throw err
+configFiles.forEach((configFile, i) => {
+  fs.exists(configFile, (exists) => {
+    if (exists) {
+      console.log(configFile + ' exists already.')
+      return
     }
 
-    console.log(
-      'slack-status-config-example.js was copied to slack-status-config.js',
-    )
+    fs.copyFile(exampleFiles[i], configFile, (err) => {
+      if (err) {
+        throw err
+      }
+
+      console.log(configFile + ' copied')
+    })
   })
 })

@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 module.exports = [
   /**
    * You can add as many slack workspaces as you want here, just make sure
@@ -12,7 +14,7 @@ module.exports = [
      *
      * optional: remove, if filtering is not intended
      */
-    email: 'your-address@mail.com',
+    // email: 'your-address@mail.com',
     /**
      * Add this as an Enviroment variable on Vercel and in the local `.env` file
      */
@@ -27,7 +29,7 @@ module.exports = [
      *
      * Add this as an Enviroment variable on Vercel and in the local `.env` file
      */
-    zoomVerificationToken: process.env.ZOOM_TOKEN,
+    zoomVerificationToken: process.env.VERIFICATION_TOKEN,
     /**
      * Slack DnD Status
      *
