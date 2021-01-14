@@ -6,6 +6,7 @@ module.exports = {
   trailingComma: 'all',
   tabWidth: 2,
   useTabs: false,
+  proseWrap: "always",
   overrides: [
     {
       files: 'package*.json',
